@@ -3,7 +3,7 @@ CXXFLAGS = -pthread -std=c++11 -march=native
 OBJS = vector.o embedding.o
 INCLUDES = -I.
 
-embagg: $(OBJS) src/main.cc
+stuffedturkey: $(OBJS) src/main.cc
 	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o embagg
 
 vector.o: src/vector.cc src/vector.h
@@ -13,9 +13,9 @@ embedding.o: src/embedding.cc src/embedding.h
 	$(CXX) $(CXXFLAGS) -c src/embedding.cc
 
 clean:
-	rm -rf *.o embagg
+	rm -rf *.o stuffedturkey
 
 install:
-	install embagg /usr/local/bin
+	install stuffedturkey /usr/local/bin
 
 .PHONY : clean install
