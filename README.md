@@ -1,3 +1,5 @@
+![](inc/turkey.png)
+
 # StuffedTurkey
 
 This is a package for Distributed Embedding aggregation. The name comes from the fact that the package is there to bundle (aggregate) vectors (e.g. distributed word representations). Therefore in a certain sense to "stuff" them into a more general form. Besides, the name is also easy to remember, cool and it just happened to be Thanksgiving.
