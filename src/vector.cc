@@ -3,7 +3,8 @@
 
 #include "vector.h"
 
-namespace eagg{
+namespace StuffedTurkey {
+    Vector::Vector() : data_(std::vector<float>()) {}
 
     Vector::Vector(int64_t m) : data_(m) {}
 
@@ -23,32 +24,6 @@ namespace eagg{
     //    
     //}
     
-    Vector* Vector::mean(std::vector<Vector*> vecs) {
-        if (vecs.size() == 0){
-            throw std::runtime_error("cannot calculate mean vector given ");
-        }
-        
-        uint32_t dim = vecs[0]->size();
-        
-        
-        // input array
-        Vector* nv = new Vector(dim);
-        
-        for (uint32_t ci = 0; ci < dim; ci++) {
-            // component
-            float tc = 0.0;
-            
-            for (uint32_t vi = 0; vi < vecs.size(); vi++) {
-                //Vector v = *vecs[vi];
-                //tc += v[ci];
-                tc += (*vecs[vi])[ci];
-            }
-            
-            nv->data_[ci] = tc/vecs.size();
-        }
-        
-        return nv;
-    }
     
     std::ostream& operator<<(std::ostream& os, const Vector& v) {
       os << std::setprecision(5);

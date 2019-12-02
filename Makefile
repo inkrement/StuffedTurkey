@@ -1,10 +1,11 @@
 CXX = c++
-CXXFLAGS = -pthread -std=c++11 -march=native
+# -Wall
+CXXFLAGS = -pthread -std=c++17 -march=native
 OBJS = vector.o embedding.o
 INCLUDES = -I.
 
 stuffedturkey: $(OBJS) src/main.cc
-	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o embagg
+	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o stuffedturkey
 
 vector.o: src/vector.cc src/vector.h
 	$(CXX) $(CXXFLAGS) -c src/vector.cc

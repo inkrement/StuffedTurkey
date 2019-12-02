@@ -1,6 +1,13 @@
 #include "embedding.h"
 
-namespace eagg {
+namespace StuffedTurkey {
+    Item::Item(Vector vector) : v{vector}, c{std::nullopt} {}
+    Item::Item(Vector vector, int64_t count) : v{vector}, c{count} {}
+    
+    Item& Item::aggregate(std::vector<Item> items, agg_function aggregation){
+        return agg_function(items);
+    }
+    
     Embedding::Embedding(int64_t dim) : dim_(dim), data_() {}
     
     void Embedding::dump(std::ostream& out) const {
@@ -8,24 +15,8 @@ namespace eagg {
       out << data_.size() << " " << dim_ << std::endl;
       
       // write out vectors
-        
       for (auto it = data_.begin(); it != data_.end(); ++it){
-          //TODO
-          
-          out << it->first << ' ' << *it->second << std::endl;
-          //cout << *it << endl;
-      }
-      /*
-      for (int64_t i = 0; i < m_; i++) {
-        for (int64_t j = 0; j < n_; j++) {
-          if (j > 0) {
-            out << " ";
-          }
-          out << at(i, j);
-        }
-        out << std::endl;
-      }
-      */
-        
+          out << it->first << ' ' << it->second.vector() << std::endl;
+      } 
     };
 }

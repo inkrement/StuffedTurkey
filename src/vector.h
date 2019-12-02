@@ -5,7 +5,7 @@
 #include <ostream>
 #include <numeric>
 
-namespace eagg {
+namespace StuffedTurkey {
     
 class Vector {
  protected:
@@ -14,6 +14,7 @@ class Vector {
   //std::array<float> data_;
 
  public:
+  Vector();
   explicit Vector(int64_t);
   Vector(const Vector&) = default;
   Vector(Vector&&) noexcept = default;
@@ -46,7 +47,7 @@ class Vector {
   }
   void zero();
   float norm() const;
-  static Vector* mean(std::vector<Vector*> vecs);
+  //static Vector* mean(std::vector<Vector*> vecs);
 };
     
 std::ostream& operator<<(std::ostream&, const Vector&);
