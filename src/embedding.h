@@ -26,8 +26,16 @@ namespace StuffedTurkey {
             inline Vector vector() const{
                 return v;
             }
+
+            inline float& operator[](uint8_t idx) {
+              return v[idx];
+            }
+
+            inline int size() const{
+              return v.size();
+            }
         
-	    Item aggregate(std::vector<Item>, Item func (std::vector<Item>)); 
+	          static Item aggregate(std::vector<Item>, Item func (std::vector<Item>)); 
     };
     
  
@@ -41,6 +49,9 @@ namespace StuffedTurkey {
 
       inline int64_t len() const {
         return data_.size();
+      }
+      bool empty() const {
+        return data_.size() == 0;
       }
       inline int64_t dim() const {
         return dim_;

@@ -65,33 +65,61 @@ void printUsage(){
     std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
 }
 
-Item& mean(std::vector<Item> items) {
-        if (vecs.size() == 0){
+Item mean(std::vector<Item> items) {
+        if (items.size() == 0){
             throw std::runtime_error("cannot calculate mean vector given ");
         }
         
-        uint32_t dim = items[0]->size();
+        uint32_t dim = items[0].size();
         
         
         // input array
-        Vector* nv = new Vector(dim);
+        Vector nv(dim);
         
         for (uint32_t ci = 0; ci < dim; ci++) {
             // component
             float tc = 0.0;
             
-            for (uint32_t vi = 0; vi < vecs.size(); vi++) {
+            for (uint32_t vi = 0; vi < items.size(); vi++) {
                 //Vector v = *vecs[vi];
                 //tc += v[ci];
-                tc += (*vecs[vi])[ci];
+                tc += items[vi][ci];
             }
             
-            nv->data_[ci] = tc/vecs.size();
+            nv[ci] = tc/items.size();
+        }
+        
+        return Item(nv);
+    }
+
+/*
+Item mean(std::vector<Item> items) {
+        if (items.size() == 0){
+            throw std::runtime_error("cannot calculate mean vector given ");
+        }
+        
+        uint32_t dim = items[0].size();
+        
+        
+        // input array
+        Vector nv = new Vector(dim);
+        
+        for (uint32_t ci = 0; ci < dim; ci++) {
+            // component
+            float tc = 0.0;
+            
+            for (uint32_t vi = 0; vi < items.size(); vi++) {
+                //Vector v = *vecs[vi];
+                //tc += v[ci];
+                tc += (items[vi])[ci];
+            }
+            
+            nv.data_[ci] = tc/items.size();
         }
         
         return nv;
     }
-
+*/
 
 int main(int argc, char * argv[]){
     /*if (argc != 4){
@@ -139,7 +167,7 @@ int main(int argc, char * argv[]){
             
             
             Item ni = Item::aggregate(items, mean);
-            new_emb.insert(make_pair(it.key(), Vector::mean(items)));
+            new_emb.insert(make_pair(it.key(), mean(items)));
         }
         
         break;
