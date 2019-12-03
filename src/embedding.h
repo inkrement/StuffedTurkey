@@ -11,11 +11,9 @@
 #include "vector.h"
 
 namespace StuffedTurkey {
-    
-    typedef Item (*agg_function)(std::vector<Item>);
-   
     class Item {
-        public:
+
+	public:
             Vector v;
             std::optional<int64_t> c;
             
@@ -29,10 +27,10 @@ namespace StuffedTurkey {
                 return v;
             }
         
-            Item& aggregate(std::vector<Item>, agg_function);
+	    Item aggregate(std::vector<Item>, Item func (std::vector<Item>)); 
     };
     
-    
+ 
     class Embedding {
      protected:
       std::map<std::string, Item> data_;

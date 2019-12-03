@@ -4,8 +4,8 @@ namespace StuffedTurkey {
     Item::Item(Vector vector) : v{vector}, c{std::nullopt} {}
     Item::Item(Vector vector, int64_t count) : v{vector}, c{count} {}
     
-    Item& Item::aggregate(std::vector<Item> items, agg_function aggregation){
-        return agg_function(items);
+    Item Item::aggregate(std::vector<Item> items, Item func (std::vector<Item>)){
+        return func(items);
     }
     
     Embedding::Embedding(int64_t dim) : dim_(dim), data_() {}
