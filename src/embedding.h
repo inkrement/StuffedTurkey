@@ -20,8 +20,8 @@ namespace StuffedTurkey {
             // default constructor 
             // required by std::map / [] operator
             Item() = default;
-            explicit Item(Vector vector);
-            explicit Item(Vector vector, int64_t count);
+            explicit Item(Vector);
+            explicit Item(Vector, int64_t);
         
             inline Vector vector() const{
                 return v;
@@ -67,6 +67,8 @@ namespace StuffedTurkey {
       }
         
       void dump(std::ostream&) const;
+      
+      static Embedding loadvec(std::string);
 
       class EncounteredNaNError : public std::runtime_error {
        public:

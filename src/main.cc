@@ -17,123 +17,66 @@ using namespace std;
 using namespace StuffedTurkey;
 
 
-std::pair<std::string, Item> parseline(string line, int64_t dim){
-    Vector vec(dim);
-    
-    istringstream iss(line);
-    
-    // load label
-    string label;
-    iss >> label;
-    
-    // fill vector
-    for (int i = 0; i < vec.size(); i++){
-        iss >> vec.data()[i];
+Item mean(std::vector<Item> items) {
+    if (items.size() == 0){
+        throw std::runtime_error("cannot calculate mean vector given ");
     }
     
-    //cout << label << " " << *vec << endl;
+    uint32_t dim = items[0].size();
     
-    return make_pair(label, Item(vec));
+    
+    // input array
+    Vector nv(dim);
+    
+    for (uint32_t ci = 0; ci < dim; ci++) {
+        // component
+        float tc = 0.0;
+        
+        for (uint32_t vi = 0; vi < items.size(); vi++) {
+            //Vector v = *vecs[vi];
+            //tc += v[ci];
+            tc += items[vi][ci];
+        }
+        
+        nv[ci] = tc/items.size();
+    }
+    
+    return Item(nv);
 }
 
-Embedding parsevec(ifstream &in){
-    int64_t num;
-    int64_t dim;
-    
-    in >> num;
-    in >> dim;
-    
-    Embedding emb(dim);
-    std::string line;
-    
-    // skip one empty line
-    getline(in, line);
-    
-    int32_t lines = 0;
-    
-    while (getline(in, line)){
-        //TODO
-        emb.insert(parseline(line, dim));
-        
-        lines++;
-    }
-    
-    return emb;
-}
 
 void printUsage(){
     std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
 }
 
-Item mean(std::vector<Item> items) {
-        if (items.size() == 0){
-            throw std::runtime_error("cannot calculate mean vector given ");
-        }
-        
-        uint32_t dim = items[0].size();
-        
-        
-        // input array
-        Vector nv(dim);
-        
-        for (uint32_t ci = 0; ci < dim; ci++) {
-            // component
-            float tc = 0.0;
-            
-            for (uint32_t vi = 0; vi < items.size(); vi++) {
-                //Vector v = *vecs[vi];
-                //tc += v[ci];
-                tc += items[vi][ci];
-            }
-            
-            nv[ci] = tc/items.size();
-        }
-        
-        return Item(nv);
-    }
-
-/*
-Item mean(std::vector<Item> items) {
-        if (items.size() == 0){
-            throw std::runtime_error("cannot calculate mean vector given ");
-        }
-        
-        uint32_t dim = items[0].size();
-        
-        
-        // input array
-        Vector nv = new Vector(dim);
-        
-        for (uint32_t ci = 0; ci < dim; ci++) {
-            // component
-            float tc = 0.0;
-            
-            for (uint32_t vi = 0; vi < items.size(); vi++) {
-                //Vector v = *vecs[vi];
-                //tc += v[ci];
-                tc += (items[vi])[ci];
-            }
-            
-            nv.data_[ci] = tc/items.size();
-        }
-        
-        return nv;
-    }
-*/
+void printInfo(std::string filename){
+    // load original embedding
+    Embedding orig_emb = Embedding::loadvec(filename);
+    //TODO
+    //std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
+}
 
 int main(int argc, char * argv[]){
-    /*if (argc != 4){
+    if (argc <= 1){
         printUsage();
         exit (EXIT_FAILURE);
-    }*/
-    
-    // load original embedding
-    std::ifstream ifs(argv[2]);
-    Embedding orig_emb = parsevec(ifs);
+    }
+
+    string command(argv[1]);
+
+
+    if (command == "view") {
+        if (argc == 2){
+            printInfo(argv[2]);
+        } else {
+            printUsage();
+        }
+    }
     
     //orig_emb.dump(std::cout);
     
     // load and iterate mapping
+    /*
     std::ifstream mfs(argv[1]);
     json j;
     mfs >> j;
@@ -172,6 +115,7 @@ int main(int argc, char * argv[]){
         
         break;
     }
+    */
     
     /*
     // save embedding
@@ -180,6 +124,7 @@ int main(int argc, char * argv[]){
     new_emb.dump(ofs);
     
     */
+   
     
     return 0;
 }
