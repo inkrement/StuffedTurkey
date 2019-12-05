@@ -33,8 +33,6 @@ Item mean(std::vector<Item> items) {
         float tc = 0.0;
         
         for (uint32_t vi = 0; vi < items.size(); vi++) {
-            //Vector v = *vecs[vi];
-            //tc += v[ci];
             tc += items[vi][ci];
         }
         
@@ -44,30 +42,58 @@ Item mean(std::vector<Item> items) {
     return Item(nv);
 }
 
-
 void printUsage(){
     std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
 }
 
 void printInfo(std::string filename){
+    //TODO: check file type
     // load original embedding
-    Embedding orig_emb = Embedding::loadvec(filename);
-    //TODO
-    //std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
+    Embedding emb = Embedding::loadvec(filename);
+
+    std::cout << "Dimensions: " << emb.dim() << std::endl;
+    std::cout << "Vocab size: " << emb.len() << std::endl;
+    std::cout << "normalized: " << (emb.is_normalized() ? "true" : "false") << std::endl;
+
+    std::map<std::string, Item>::iterator iter = emb.begin();
+
+    for (uint8_t i = 0; i < 10 && iter != emb.end(); i++, iter++){
+        std::cout << iter->first;
+
+        if (i != 9) {
+            std::cout << ", ";
+        }
+    }
+    std::cout <<  endl;
+}
+
+void normalizeEmbedding(std::string in_file, std::string out_file){
+    Embedding emb = Embedding::loadvec(in_file);
+
+    emb.normalize();
+
+    std::ofstream ofs(out_file);
+    emb.dump(ofs);
 }
 
 int main(int argc, char * argv[]){
-    if (argc <= 1){
-        printUsage();
-        exit (EXIT_FAILURE);
-    }
+    //if (argc <= 1){
+    //    printUsage();
+    //    exit (EXIT_FAILURE);
+    //}
 
     string command(argv[1]);
 
 
     if (command == "view") {
-        if (argc == 2){
+        if (argc == 3){
             printInfo(argv[2]);
+        } else {
+            printUsage();
+        }
+    } else if (command == "normalize") {
+        if (argc == 4){
+            normalizeEmbedding(argv[2], argv[3]);
         } else {
             printUsage();
         }

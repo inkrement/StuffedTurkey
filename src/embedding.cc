@@ -1,5 +1,8 @@
 #include <fstream>
 #include <sstream>
+#include <cmath>
+
+#include <iostream>
 
 #include "embedding.h"
 
@@ -40,6 +43,32 @@ namespace StuffedTurkey {
         //cout << label << " " << *vec << endl;
         
         return make_pair(label, Item(vec));
+    }
+
+    bool Embedding::is_normalized() {
+        std::vector<float> lengths;
+        std::map<std::string, Item>::iterator iter = this->begin();
+        for (uint8_t i = 0; i < 10 && iter != this->end(); i++, iter++){
+            lengths.push_back(iter->second.vector().euclidean_length());
+        }
+
+        float sample_sum = std::accumulate(lengths.begin(), lengths.end(), 0.0);
+        float mean = sample_sum / lengths.size();
+        
+        double sq_sum = std::inner_product(lengths.begin(), lengths.end(), lengths.begin(), 0.0);
+        double sample_sd = std::accumulate(lengths.begin(), lengths.end(), 0.0) / lengths.size();
+
+        float test_statistic = mean - 1 / sample_sd / std::sqrt(lengths.size());
+
+        //std::cout << test_statistic << std::endl;
+
+        return test_statistic * 2 < 1.96;
+    }
+
+    void Embedding::normalize(){
+        for (auto &item: data_){
+            item.second.v.norm();
+        }
     }
 
     Embedding Embedding::loadvec(std::string filename){

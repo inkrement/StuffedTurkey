@@ -12,18 +12,21 @@ namespace StuffedTurkey {
       std::fill(data_.begin(), data_.end(), 0.0);
     }
 
-    float Vector::norm() const {
-      float sum = 0;
-      for (int64_t i = 0; i < size(); i++) {
-        sum += data_[i] * data_[i];
+    void Vector::norm() {
+        double el = this->euclidean_length();
+
+        for (float &c: data_){
+          c = c/el;
+        }
+    }
+
+    double Vector::euclidean_length() const {
+      double sum = 0;
+      for (auto c: data_) {
+        sum += c*c;
       }
       return std::sqrt(sum);
     }
-    
-    //Vector* Vector::aggregate(std::vector<Vector*> vecs, function callback_func){
-    //    
-    //}
-    
     
     std::ostream& operator<<(std::ostream& os, const Vector& v) {
       os << std::setprecision(5);

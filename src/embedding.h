@@ -59,15 +59,25 @@ namespace StuffedTurkey {
       inline Item& operator[](std::string idx) {
         return data_[idx];
       }
+      inline std::map<std::string, Item>::iterator begin() {
+        return data_.begin();
+      }
+      inline std::map<std::string, Item>::iterator end() {
+        return data_.end();
+      }
       inline void insert(std::pair<std::string, Item> elem){
         data_.insert(elem);
       }
       inline bool contains(std::string idx){
         return (data_.find(idx) != data_.end());
       }
-        
+
+      void normalize();
+
+      bool is_normalized();
+
       void dump(std::ostream&) const;
-      
+
       static Embedding loadvec(std::string);
 
       class EncounteredNaNError : public std::runtime_error {
