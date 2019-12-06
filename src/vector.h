@@ -46,7 +46,7 @@ class Vector {
     return data_.size();
   }
   void zero();
-  void norm();
+  void unit();
   double euclidean_length() const;
   //static Vector* mean(std::vector<Vector*> vecs);
 };

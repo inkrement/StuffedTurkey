@@ -45,7 +45,7 @@ namespace StuffedTurkey {
         return make_pair(label, Item(vec));
     }
 
-    bool Embedding::is_normalized() {
+    bool Embedding::is_unit() {
         std::vector<float> lengths;
         std::map<std::string, Item>::iterator iter = this->begin();
         for (uint8_t i = 0; i < 10 && iter != this->end(); i++, iter++){
@@ -65,9 +65,9 @@ namespace StuffedTurkey {
         return test_statistic * 2 < 1.96;
     }
 
-    void Embedding::normalize(){
+    void Embedding::unit(){
         for (auto &item: data_){
-            item.second.v.norm();
+            item.second.v.unit();
         }
     }
 

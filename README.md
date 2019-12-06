@@ -17,3 +17,5 @@ make
  - add other input and output formats (e.g., json, bin)
  - python package
  - R package
+ - bigquery format export
+ - process bin format

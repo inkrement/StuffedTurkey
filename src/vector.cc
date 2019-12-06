@@ -12,7 +12,7 @@ namespace StuffedTurkey {
       std::fill(data_.begin(), data_.end(), 0.0);
     }
 
-    void Vector::norm() {
+    void Vector::unit() {
         double el = this->euclidean_length();
 
         for (float &c: data_){

@@ -53,7 +53,7 @@ void printInfo(std::string filename){
 
     std::cout << "Dimensions: " << emb.dim() << std::endl;
     std::cout << "Vocab size: " << emb.len() << std::endl;
-    std::cout << "normalized: " << (emb.is_normalized() ? "true" : "false") << std::endl;
+    std::cout << "normalized: " << (emb.is_unit() ? "true" : "false") << std::endl;
 
     std::map<std::string, Item>::iterator iter = emb.begin();
 
@@ -67,10 +67,10 @@ void printInfo(std::string filename){
     std::cout <<  endl;
 }
 
-void normalizeEmbedding(std::string in_file, std::string out_file){
+void unitEmbedding(std::string in_file, std::string out_file){
     Embedding emb = Embedding::loadvec(in_file);
 
-    emb.normalize();
+    emb.unit();
 
     std::ofstream ofs(out_file);
     emb.dump(ofs);
@@ -91,9 +91,9 @@ int main(int argc, char * argv[]){
         } else {
             printUsage();
         }
-    } else if (command == "normalize") {
+    } else if (command == "unit") {
         if (argc == 4){
-            normalizeEmbedding(argv[2], argv[3]);
+            unitEmbedding(argv[2], argv[3]);
         } else {
             printUsage();
         }

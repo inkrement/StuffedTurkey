@@ -72,9 +72,9 @@ namespace StuffedTurkey {
         return (data_.find(idx) != data_.end());
       }
 
-      void normalize();
+      void unit();
 
-      bool is_normalized();
+      bool is_unit();
 
       void dump(std::ostream&) const;
 
