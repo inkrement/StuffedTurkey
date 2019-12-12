@@ -20,7 +20,6 @@ using namespace std;
 using namespace StuffedTurkey;
 
 
-
 Item mean(std::vector<Item> items) {
     if (items.size() == 0){
         throw std::runtime_error("cannot calculate mean vector given ");

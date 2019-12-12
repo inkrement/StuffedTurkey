@@ -64,8 +64,6 @@ namespace StuffedTurkey {
 
         float test_statistic = mean - 1 / sample_sd / std::sqrt(lengths.size());
 
-        //std::cout << test_statistic << std::endl;
-
         return test_statistic * 2 < 1.96;
     }
 
@@ -75,35 +73,41 @@ namespace StuffedTurkey {
         }
     }
 
-    void Embedding::loadvec(std::istream& in){
-        /*std::ifstream ifs(filename);
+    void Embedding::loadvec(const std::string& filename){
+        std::ifstream ifs(filename);
 
         if (!ifs.is_open()) {
             throw std::invalid_argument(filename + " cannot be opened for loading!");
-        }*/
+        }
 
+        loadvec(ifs);
+        ifs.close();
+    }
+
+    void Embedding::loadvec(std::istream& in){
         int num, dim;
 
         in.read((char*) &num, sizeof(int));
-        
-        in >> num;
-        in >> dim;
+        in.read((char*) &dim, sizeof(int));
         
         std::string line;
         
         // skip one empty line
+        // TODO: check if you have to skip it
         std::getline(in, line);
         
         while (std::getline(in, line)){
-            //TODO
             insert(vec_parseline(line, dim));
         }
-
-        //ifs.close();
     };
 
     void Embedding::loadbin(const std::string& filename){
         std::ifstream ifs(filename, std::ifstream::binary);
+
+        if (!ifs.is_open()) {
+            throw std::invalid_argument(filename + " cannot be opened for loading!");
+        }
+
         loadbin(ifs);
         ifs.close();
     }
