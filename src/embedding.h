@@ -45,6 +45,7 @@ namespace StuffedTurkey {
       int64_t dim_;
 
      public:
+      explicit Embedding();
       explicit Embedding(int64_t);
 
       inline int64_t len() const {
@@ -68,6 +69,9 @@ namespace StuffedTurkey {
       inline void insert(std::pair<std::string, Item> elem){
         data_.insert(elem);
       }
+      void insert(std::string word, Item item){
+        data_.insert(std::pair<std::string, Item>(word,item));
+      }
       inline bool contains(std::string idx){
         return (data_.find(idx) != data_.end());
       }
@@ -77,8 +81,11 @@ namespace StuffedTurkey {
       bool is_unit();
 
       void dump(std::ostream&) const;
-
-      static Embedding loadvec(std::string);
+      
+      void loadbin(const std::string&);
+      void loadvec(const std::string&);
+      void loadbin(std::istream&);
+      void loadvec(std::istream&);
 
       class EncounteredNaNError : public std::runtime_error {
        public:

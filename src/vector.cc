@@ -8,6 +8,8 @@ namespace StuffedTurkey {
 
     Vector::Vector(int64_t m) : data_(m) {}
 
+    Vector::Vector(std::vector<float> data) : data_(data) {}
+
     void Vector::zero() {
       std::fill(data_.begin(), data_.end(), 0.0);
     }

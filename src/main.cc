@@ -2,19 +2,23 @@
 #include <string>
 #include <cstdint>
 #include <stdlib.h> 
-
-#include "vector.h"
-#include "embedding.h"
+#include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <assert.h>
+#include <memory>
 
 #include "json.hpp"
 #include "cxxopts.hpp"
+
+#include "vector.h"
+#include "embedding.h"
 
 using json = nlohmann::json;
 
 using namespace std;
 using namespace StuffedTurkey;
+
 
 
 Item mean(std::vector<Item> items) {
@@ -46,18 +50,48 @@ void printUsage(){
     std::cerr << "Usage: ./stuffedturkey mapping.json input_emb.vec output_emb.vec" << std::endl;
 }
 
+inline bool ends_with(const std::string& value, const std::string& ending) {
+    if (ending.size() > value.size()) return false;
+    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+uint32_t FThash(const std::string& str) {
+  uint32_t h = 2166136261;
+  for (size_t i = 0; i < str.size(); i++) {
+    h = h ^ uint32_t(int8_t(str[i]));
+    h = h * 16777619;
+  }
+  return h;
+}
+
+std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
+    std::unique_ptr<Embedding> e(new Embedding());
+
+    if (ends_with(filename, ".vec")){
+        e->loadvec(filename);
+    } else if (ends_with(filename, ".bin")) {
+        std::cout << "read binary model" << std::endl;
+        
+        e->loadbin(filename);
+
+        // ifs
+    } else {
+        throw runtime_error("unknown format");
+    }
+
+    return e;
+}
+
 void printInfo(std::string filename){
-    //TODO: check file type
-    // load original embedding
-    Embedding emb = Embedding::loadvec(filename);
+    auto emb = loadEmbedding(filename); 
 
-    std::cout << "Dimensions: " << emb.dim() << std::endl;
-    std::cout << "Vocab size: " << emb.len() << std::endl;
-    std::cout << "normalized: " << (emb.is_unit() ? "true" : "false") << std::endl;
+    std::cout << "Dimensions: " << emb->dim() << std::endl;
+    std::cout << "Vocab size: " << emb->len() << std::endl;
+    std::cout << "normalized: " << (emb->is_unit() ? "true" : "false") << std::endl;
 
-    std::map<std::string, Item>::iterator iter = emb.begin();
+    std::map<std::string, Item>::iterator iter = emb->begin();
 
-    for (uint8_t i = 0; i < 10 && iter != emb.end(); i++, iter++){
+    for (uint8_t i = 0; i < 10 && iter != emb->end(); i++, iter++){
         std::cout << iter->first;
 
         if (i != 9) {
@@ -68,12 +102,12 @@ void printInfo(std::string filename){
 }
 
 void unitEmbedding(std::string in_file, std::string out_file){
-    Embedding emb = Embedding::loadvec(in_file);
+    auto emb = loadEmbedding(in_file);
 
-    emb.unit();
+    emb->unit();
 
     std::ofstream ofs(out_file);
-    emb.dump(ofs);
+    emb->dump(ofs);
 }
 
 int main(int argc, char * argv[]){

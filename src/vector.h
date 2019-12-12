@@ -11,11 +11,11 @@ class Vector {
  protected:
   
   std::vector<float> data_;
-  //std::array<float> data_;
 
  public:
   Vector();
   explicit Vector(int64_t);
+  explicit Vector(std::vector<float>);
   Vector(const Vector&) = default;
   Vector(Vector&&) noexcept = default;
   Vector& operator=(const Vector&) = default;
