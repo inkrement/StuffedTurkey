@@ -10,7 +10,7 @@ stuffedturkey: $(OBJS) src/main.cc
 vector.o: src/vector.cc src/vector.h
 	$(CXX) $(CXXFLAGS) -c src/vector.cc
 
-embedding.o: src/embedding.cc src/embedding.h
+embedding.o: src/embedding.cc src/embedding.h src/vector.h
 	$(CXX) $(CXXFLAGS) -c src/embedding.cc
 
 clean:

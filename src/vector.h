@@ -48,7 +48,6 @@ class Vector {
   void zero();
   void unit();
   double euclidean_length() const;
-  //static Vector* mean(std::vector<Vector*> vecs);
 };
     
 std::ostream& operator<<(std::ostream&, const Vector&);

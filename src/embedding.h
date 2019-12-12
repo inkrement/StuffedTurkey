@@ -42,7 +42,7 @@ namespace StuffedTurkey {
     class Embedding {
      protected:
       std::map<std::string, Item> data_;
-      int64_t dim_;
+      int32_t dim_;
 
      public:
       explicit Embedding();
@@ -66,12 +66,7 @@ namespace StuffedTurkey {
       inline std::map<std::string, Item>::iterator end() {
         return data_.end();
       }
-      inline void insert(std::pair<std::string, Item> elem){
-        data_.insert(elem);
-      }
-      void insert(std::string word, Item item){
-        data_.insert(std::pair<std::string, Item>(word,item));
-      }
+
       inline bool contains(std::string idx){
         return (data_.find(idx) != data_.end());
       }

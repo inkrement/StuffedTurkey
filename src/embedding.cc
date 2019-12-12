@@ -15,6 +15,30 @@ namespace StuffedTurkey {
     Item Item::aggregate(std::vector<Item> items, Item func (std::vector<Item>)){
         return func(items);
     }
+
+    Item mean(std::vector<Item> items) {
+        if (items.size() == 0){
+            throw std::runtime_error("cannot calculate mean vector given ");
+        }
+        
+        uint32_t dim = items[0].size();
+        
+        // input array
+        Vector nv(dim);
+        
+        for (uint32_t ci = 0; ci < dim; ci++) {
+            // component
+            float tc = 0.0;
+            
+            for (uint32_t vi = 0; vi < items.size(); vi++) {
+                tc += items[vi][ci];
+            }
+            
+            nv[ci] = tc/items.size();
+        }
+        
+        return Item(nv);
+    }
     
     Embedding::Embedding() {}
 
@@ -30,7 +54,7 @@ namespace StuffedTurkey {
       } 
     }
 
-    std::pair<std::string, Item> vec_parseline(std::string line, std::int64_t dim){
+    std::pair<std::string, Item> vec_parseline(const std::string &line, const std::int64_t& dim){
         Vector vec(dim);
         
         std::istringstream iss(line);
@@ -43,9 +67,7 @@ namespace StuffedTurkey {
         for (int i = 0; i < vec.size(); i++){
             iss >> vec.data()[i];
         }
-        
-        //cout << label << " " << *vec << endl;
-        
+
         return make_pair(label, Item(vec));
     }
 
@@ -85,19 +107,25 @@ namespace StuffedTurkey {
     }
 
     void Embedding::loadvec(std::istream& in){
-        int num, dim;
-
-        in.read((char*) &num, sizeof(int));
-        in.read((char*) &dim, sizeof(int));
-        
+        int num;
         std::string line;
-        
-        // skip one empty line
-        // TODO: check if you have to skip it
+
         std::getline(in, line);
+        std::stringstream s(line);
         
-        while (std::getline(in, line)){
-            insert(vec_parseline(line, dim));
+        s >> num;
+        s >> dim_;
+
+        uint32_t i = 0;
+        
+        while (std::getline(in, line) && i < num){
+            // skip first entry if empty line
+            if (i == 0 && std::all_of(line.begin(), line.end(), isspace)){
+                continue;
+            }
+
+            data_.insert(vec_parseline(line, dim_));
+            i++;
         }
     };
 
@@ -123,8 +151,7 @@ namespace StuffedTurkey {
         // ignore version
         in.ignore(sizeof(int32_t)); 
 
-        int dim;
-        in.read((char*)&(dim), sizeof(int));
+        in.read((char*)&(dim_), sizeof(int));
 
         // ignore fasttext arguments:
         //  ws, epoch, minCount, neg, wordNgrams, loss, 
@@ -170,18 +197,12 @@ namespace StuffedTurkey {
         int64_t dim_;
         in.read((char*)&dim_, sizeof(int64_t));
 
-        assert(dim == dim_);
-
         for (auto &w : words_){
-            auto d_v = std::vector<float>(dim);
+            auto d_v = std::vector<float>(dim_);
 
-            in.read((char*)d_v.data(), sizeof(float) * dim);
+            in.read((char*)d_v.data(), sizeof(float) * dim_);
 
-            insert(
-                w.word,
-                Item(Vector(d_v),w.count)
-            );
+            data_.insert(std::make_pair(w.word, Item(Vector(d_v), w.count)));
         }
     }
-
 }
