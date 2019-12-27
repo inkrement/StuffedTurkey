@@ -16,7 +16,6 @@
 
 using json = nlohmann::json;
 
-using namespace std;
 using namespace StuffedTurkey;
 using namespace clipp; 
 
@@ -37,7 +36,7 @@ std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
         std::cout << "read binary-model" << std::endl;
         e->loadbin(filename);
     } else {
-        throw runtime_error("unknown format");
+        throw std::runtime_error("unknown format");
     }
 
     return e;
@@ -50,15 +49,15 @@ void aggEmbedding(std::string in_file, std::string out_file, agg_mode agg_mode) 
     {
         case agg_mode::uniform:
             //TODO
-            throw runtime_error("not implemented yet!");
+            throw std::runtime_error("not implemented yet!");
             break;
         case agg_mode::weighted:
             //TODO
-            throw runtime_error("not implemented yet!");
+            throw std::runtime_error("not implemented yet!");
             break;
         case agg_mode::log_weighted:
             //TODO
-            throw runtime_error("not implemented yet!");
+            throw std::runtime_error("not implemented yet!");
             break;
     }
             
@@ -82,7 +81,7 @@ void printInfo(std::string filename){
             std::cout << ", ";
         }
     }
-    std::cout <<  endl;
+    std::cout << std::endl;
 }
 
 void unitEmbedding(std::string in_file, std::string out_file){
@@ -95,10 +94,10 @@ void unitEmbedding(std::string in_file, std::string out_file){
 }
 
 int main(int argc, char * argv[]){
-    string infile, outfile, cnt_file = "";
-    string agg_mode = "log_weighted";
-    string in_format = "auto";
-    string out_format = "vec";
+    std::string infile, outfile, cnt_file = "";
+    std::string agg_mode = "log_weighted";
+    std::string in_format = "auto";
+    std::string out_format = "vec";
 
     enum class cmd {info,help,unit,agg};
     cmd selected = cmd::help;
@@ -126,7 +125,7 @@ int main(int argc, char * argv[]){
     );
 
     if(!parse(argc, argv, cli)) {
-        cout << make_man_page(cli, "stuffedturkey");
+        std::cout << make_man_page(cli, "stuffedturkey");
         return 1;
     } 
 
