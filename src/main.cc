@@ -8,8 +8,8 @@
 #include <assert.h>
 #include <memory>
 
-#include "json.hpp"
-#include "cxxopts.hpp"
+#include "vendor/json.hpp"
+#include "vendor/clipp.hpp"
 
 #include "vector.h"
 #include "embedding.h"
@@ -18,29 +18,13 @@ using json = nlohmann::json;
 
 using namespace std;
 using namespace StuffedTurkey;
+using namespace clipp; 
 
-
-void printUsage(){
-    std::cerr << "Usage: ./stuffedturkey command" << std::endl << std::endl;
-    std::cerr << "possible commands: " << std::endl;
-    std::cerr << " - help" << std::endl;
-    std::cerr << " - view <embedding-file>" << std::endl;
-    std::cerr << " - unit <input-file> <output-file>" << std::endl;
-    
-}
+enum class agg_mode {uniform,weighted,log_weighted};
 
 inline bool ends_with(const std::string& value, const std::string& ending) {
     if (ending.size() > value.size()) return false;
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
-
-uint32_t FThash(const std::string& str) {
-  uint32_t h = 2166136261;
-  for (size_t i = 0; i < str.size(); i++) {
-    h = h ^ uint32_t(int8_t(str[i]));
-    h = h * 16777619;
-  }
-  return h;
 }
 
 std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
@@ -57,6 +41,29 @@ std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
     }
 
     return e;
+}
+
+void aggEmbedding(std::string in_file, std::string out_file, agg_mode agg_mode) {
+    auto emb = loadEmbedding(in_file);
+
+    switch (agg_mode)
+    {
+        case agg_mode::uniform:
+            //TODO
+            throw runtime_error("not implemented yet!");
+            break;
+        case agg_mode::weighted:
+            //TODO
+            throw runtime_error("not implemented yet!");
+            break;
+        case agg_mode::log_weighted:
+            //TODO
+            throw runtime_error("not implemented yet!");
+            break;
+    }
+            
+    std::ofstream ofs(out_file);
+    emb->dump(ofs);
 }
 
 void printInfo(std::string filename){
@@ -88,27 +95,55 @@ void unitEmbedding(std::string in_file, std::string out_file){
 }
 
 int main(int argc, char * argv[]){
-    if (argc <= 1){
-        printUsage();
-        exit (EXIT_FAILURE);
-    }
+    string infile, outfile, cnt_file = "";
+    string agg_mode = "log_weighted";
+    string in_format = "auto";
+    string out_format = "vec";
 
-    string command(argv[1]);
+    enum class cmd {info,help,unit,agg};
+    cmd selected = cmd::help;
 
-    if (command == "view") {
-        if (argc == 3){
-            printInfo(argv[2]);
-        } else {
-            printUsage();
-        }
-    } else if (command == "unit") {
-        if (argc == 4){
-            unitEmbedding(argv[2], argv[3]);
-        } else {
-            printUsage();
-        }
-    } else if (command == "help") {
-        printUsage();
+
+    auto cli = (
+        (
+            (
+                (command("info").set(selected, cmd::info), 
+                    value("input file", infile)) |
+                (command("unit").set(selected, cmd::unit), 
+                    value("input file", infile), 
+                    value("output file", outfile)) | 
+                (command("agg", "aggregate").set(selected, cmd::agg),
+                    value("input file", infile), 
+                    value("output file", outfile),
+                    option("--item_counts") & value("count_file", cnt_file) % "item counts to calculate frequencies",
+                    option("--mode", "-m") & value("agg_mode", agg_mode) % 
+                        "aggregation mode (uniform, weighted or log_weighted). Defaults to log_weigted mean"
+                )
+            ),
+            option("--in_format") & value("in_format", in_format) % "input format: bin, vec or auto (default)",
+            option("--out_format") & value("out_format", out_format) % "output format bin or vec (default)"
+        ) | (command("help").set(selected, cmd::help))
+    );
+
+    if(!parse(argc, argv, cli)) {
+        cout << make_man_page(cli, "stuffedturkey");
+        return 1;
+    } 
+
+    switch(selected) {
+        case cmd::info: 
+            printInfo(infile);
+            break;
+        case cmd::unit:
+            unitEmbedding(infile, outfile);
+            break;
+        case cmd::agg:
+            //Embedding
+            //aggEmbedding(infile, outfile, argv[4]);
+            break;
+        case cmd::help:
+            std::cout << make_man_page(cli, "stuffedturkey");
+            break;
     }
     
     return 0;
