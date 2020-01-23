@@ -19,7 +19,7 @@ using json = nlohmann::json;
 using namespace StuffedTurkey;
 using namespace clipp; 
 
-enum class agg_mode {uniform,weighted,log_weighted};
+enum class AggregationMode {uniform,weighted,log_weighted};
 
 inline bool ends_with(const std::string& value, const std::string& ending) {
     if (ending.size() > value.size()) return false;
@@ -42,27 +42,51 @@ std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
     return e;
 }
 
-void aggEmbedding(std::string in_file, std::string out_file, agg_mode agg_mode) {
+void aggEmbedding(std::string in_file, std::string out_file, const std::string map_file, AggregationMode agg_mode) {
     auto emb = loadEmbedding(in_file);
+    Embedding out_emb = Embedding(emb->dim());
+
+    std::ifstream map_stream(map_file);
+    std::string line;
+    json j;
+
+    Item (*agg_fn)(std::vector<Item>);
 
     switch (agg_mode)
     {
-        case agg_mode::uniform:
-            //TODO
-            throw std::runtime_error("not implemented yet!");
+        case AggregationMode::uniform:
+            agg_fn = Item::avg;
             break;
-        case agg_mode::weighted:
-            //TODO
-            throw std::runtime_error("not implemented yet!");
+        case AggregationMode::weighted:
+            agg_fn = Item::weighted_avg;
             break;
-        case agg_mode::log_weighted:
-            //TODO
-            throw std::runtime_error("not implemented yet!");
-            break;
+        case AggregationMode::log_weighted:
+            agg_fn = Item::log_weighted_avg;
     }
-            
+
+    while (std::getline(map_stream, line)) {
+        j = json::parse(line);
+
+        json::iterator it = j.begin();
+
+        if ( it != j.end()) {
+            std::vector<Item> oitems = {};
+
+            for (auto v: it.value()){
+                if (emb->contains(v)){
+                    oitems.push_back(emb->get(v));
+                }
+            }
+
+            Item new_item = Item::aggregate(oitems, agg_fn);
+            out_emb.add(it.key(), new_item);
+        }
+    }
+    
+    out_emb.unit();
+    
     std::ofstream ofs(out_file);
-    emb->dump(ofs);
+    out_emb.dump(ofs);
 }
 
 void printInfo(std::string filename){
@@ -94,14 +118,14 @@ void unitEmbedding(std::string in_file, std::string out_file){
 }
 
 int main(int argc, char * argv[]){
-    std::string infile, outfile, cnt_file = "";
+    std::string infile, outfile, cnt_file, mapping_file = "";
     std::string agg_mode = "log_weighted";
     std::string in_format = "auto";
     std::string out_format = "vec";
 
     enum class cmd {info,help,unit,agg};
     cmd selected = cmd::help;
-
+    AggregationMode amode = AggregationMode::log_weighted;
 
     auto cli = (
         (
@@ -114,6 +138,7 @@ int main(int argc, char * argv[]){
                 (command("agg", "aggregate").set(selected, cmd::agg),
                     value("input file", infile), 
                     value("output file", outfile),
+                    value("mapping", mapping_file) % "json file which sates which items belong together",
                     option("--item_counts") & value("count_file", cnt_file) % "item counts to calculate frequencies",
                     option("--mode", "-m") & value("agg_mode", agg_mode) % 
                         "aggregation mode (uniform, weighted or log_weighted). Defaults to log_weigted mean"
@@ -137,8 +162,15 @@ int main(int argc, char * argv[]){
             unitEmbedding(infile, outfile);
             break;
         case cmd::agg:
+            
+            if(agg_mode == "uniform"){
+                amode = AggregationMode::uniform;
+            } else if (agg_mode == "weighted") {
+                amode = AggregationMode::weighted;
+            }
+
             //Embedding
-            //aggEmbedding(infile, outfile, argv[4]);
+            aggEmbedding(infile, outfile, mapping_file, amode);
             break;
         case cmd::help:
             std::cout << make_man_page(cli, "stuffedturkey");

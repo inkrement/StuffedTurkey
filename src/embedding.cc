@@ -16,7 +16,7 @@ namespace StuffedTurkey {
         return func(items);
     }
 
-    Item mean(std::vector<Item> items) {
+    Item averageing(std::vector<Item> items, bool weighted = false, bool logged = false) {
         if (items.size() == 0){
             throw std::runtime_error("cannot calculate mean vector given ");
         }
@@ -25,19 +25,45 @@ namespace StuffedTurkey {
         
         // input array
         Vector nv(dim);
-        
-        for (uint32_t ci = 0; ci < dim; ci++) {
-            // component
-            float tc = 0.0;
-            
-            for (uint32_t vi = 0; vi < items.size(); vi++) {
-                tc += items[vi][ci];
+        nv.zero();
+
+        double weight = 1/items.size();
+        int sum_counts = 0;
+
+        if (weighted){
+            for (Item i: items){
+                sum_counts += i.c.value_or(1);
+            }
+            if (logged) {
+                sum_counts = log(sum_counts + items.size());
+            }
+        }
+
+        for (uint32_t vi = 0; vi < items.size(); vi++) {
+            if (weighted){
+                if (logged){
+                    weight = ((double) items[vi].c.value_or(1) + 1)/sum_counts;
+                } else {
+                    weight = ((double) items[vi].c.value_or(1))/sum_counts;
+                }
             }
             
-            nv[ci] = tc/items.size();
+            for (uint32_t ci = 0; ci < dim; ci++) {
+                nv[ci] += items[vi][ci] * weight;
+            }
         }
         
         return Item(nv);
+    }
+
+    Item Item::avg(std::vector<Item> items) {
+        return averageing(items, false, false);
+    }
+    Item Item::weighted_avg(std::vector<Item> items) {
+        return averageing(items, true, false);
+    }
+    Item Item::log_weighted_avg(std::vector<Item> items) {
+        return averageing(items, true, true);
     }
     
     Embedding::Embedding() {}
