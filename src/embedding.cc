@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
 #include "embedding.h"
 
