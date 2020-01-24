@@ -1,6 +1,5 @@
 CXX = c++
-# -Wall
-CXXFLAGS = -pthread -std=c++17 -march=native
+CXXFLAGS = -pthread -std=c++17 -march=native -Wall
 OBJS = vector.o embedding.o
 INCLUDES = -I.
 

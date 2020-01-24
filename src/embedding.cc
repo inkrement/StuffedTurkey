@@ -69,7 +69,7 @@ namespace StuffedTurkey {
     
     Embedding::Embedding() {}
 
-    Embedding::Embedding(std::int64_t dim) : dim_(dim), data_() {}
+    Embedding::Embedding(std::int64_t dim) : data_(), dim_(dim) {}
     
     void Embedding::dump(std::ostream& out) const {
       // write header
@@ -108,7 +108,6 @@ namespace StuffedTurkey {
         float sample_sum = std::accumulate(lengths.begin(), lengths.end(), 0.0);
         float mean = sample_sum / lengths.size();
         
-        double sq_sum = std::inner_product(lengths.begin(), lengths.end(), lengths.begin(), 0.0);
         double sample_sd = std::accumulate(lengths.begin(), lengths.end(), 0.0) / lengths.size();
 
         float test_statistic = mean - 1 / sample_sd / std::sqrt(lengths.size());
@@ -186,9 +185,7 @@ namespace StuffedTurkey {
         in.ignore(11*sizeof(int32_t));
         in.ignore(sizeof(double)); // t
 
-        int32_t size_, nwords_, nlabels_;
-        int64_t ntokens_,pruneidx_size_;
-
+        int32_t size_, nwords_;
         in.read((char*)&size_, sizeof(int32_t));
         in.read((char*)&nwords_, sizeof(int32_t));
 
