@@ -6,7 +6,7 @@ This is a package for Distributed Embedding aggregation (e.g. *average*, *weight
 
 
 ## Usage
-Currently we only support a minimal CLI interface. R and python packages are on the TODO list. To use the software you have to compile it first. For this you need a current C++17 compiler (clang or GNU g++) and the classic build tools (make).
+Currently, we only support a minimal CLI interface. However, R and python packages are on the TODO-list. To use the software you have to compile it first. For this you need a current C++17 compiler (clang or GNU g++) and the classic build tools (e.g. make).
 
 ```bash
 make
