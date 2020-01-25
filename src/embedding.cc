@@ -121,18 +121,18 @@ namespace StuffedTurkey {
         }
     }
 
-    void Embedding::loadvec(const std::string& filename){
+    void Embedding::loadVec(const std::string& filename){
         std::ifstream ifs(filename);
 
         if (!ifs.is_open()) {
             throw std::invalid_argument(filename + " cannot be opened for loading!");
         }
 
-        loadvec(ifs);
+        loadVec(ifs);
         ifs.close();
     }
 
-    void Embedding::loadvec(std::istream& in){
+    void Embedding::loadVec(std::istream& in){
         int num;
         std::string line;
 
@@ -155,18 +155,18 @@ namespace StuffedTurkey {
         }
     };
 
-    void Embedding::loadbin(const std::string& filename){
+    void Embedding::loadFasttext(const std::string& filename){
         std::ifstream ifs(filename, std::ifstream::binary);
 
         if (!ifs.is_open()) {
             throw std::invalid_argument(filename + " cannot be opened for loading!");
         }
 
-        loadbin(ifs);
+        loadWord2Vec(ifs);
         ifs.close();
     }
 
-    void Embedding::loadbin(std::istream& in){
+    void Embedding::loadFasttext(std::istream& in){
         struct entry { std::string word; int64_t count; int8_t type; std::vector<int32_t> subwords; };
         int32_t magic;
         in.read((char*)&(magic), sizeof(int32_t));
@@ -228,5 +228,85 @@ namespace StuffedTurkey {
 
             data_.insert(std::make_pair(w.word, Item(Vector(d_v), w.count)));
         }
+    }
+
+
+    void Embedding::loadWord2Vec(const std::string& filename){
+        std::ifstream ifs(filename, std::ifstream::binary);
+
+        if (!ifs.is_open()) {
+            throw std::invalid_argument(filename + " cannot be opened for loading!");
+        }
+
+        loadFasttext(ifs);
+        ifs.close();
+    }
+
+    void Embedding::loadWord2Vec(std::istream& in){
+
+        /*
+        struct entry { std::string word; int64_t count; int8_t type; std::vector<int32_t> subwords; };
+        int32_t magic;
+        in.read((char*)&(magic), sizeof(int32_t));
+
+        if (magic != FASTTEXT_FILEFORMAT_MAGIC_INT32) {
+            throw std::runtime_error("not a fasttext model");
+        }
+        // ignore version
+        in.ignore(sizeof(int32_t)); 
+
+        in.read((char*)&(dim_), sizeof(int));
+
+        // ignore fasttext arguments:
+        //  ws, epoch, minCount, neg, wordNgrams, loss, 
+        //  model, bucket, minn, maxn, lrUpdateRate
+        in.ignore(11*sizeof(int32_t));
+        in.ignore(sizeof(double)); // t
+
+        int32_t size_, nwords_;
+        in.read((char*)&size_, sizeof(int32_t));
+        in.read((char*)&nwords_, sizeof(int32_t));
+
+        // ignore: nlabels_, ntokens_, pruneidx_size_
+        in.ignore(sizeof(int32_t)+sizeof(int64_t)+sizeof(int64_t));
+        
+        std::vector<entry> words_;
+        for (int32_t i = 0; i < size_; i++) {
+            char c;
+            entry e;
+            while ((c = in.get()) != 0) {
+                e.word.push_back(c);
+            }
+            
+            in.read((char*)&e.count, sizeof(int64_t));
+            in.read((char*)&e.type, sizeof(int8_t));
+            
+            if (e.type == 0){
+                words_.push_back(e);
+            }
+        }
+
+        bool quant_input;
+        in.read((char*)&quant_input, sizeof(bool));
+
+        if (quant_input == true) {
+            throw std::runtime_error("quant. models are not supported yet!");
+        }
+
+        // ignore m_ 
+        in.ignore(sizeof(int64_t));
+        
+        int64_t dim_;
+        in.read((char*)&dim_, sizeof(int64_t));
+
+        for (auto &w : words_){
+            auto d_v = std::vector<float>(dim_);
+
+            in.read((char*)d_v.data(), sizeof(float) * dim_);
+
+            data_.insert(std::make_pair(w.word, Item(Vector(d_v), w.count)));
+        }
+
+        */
     }
 }

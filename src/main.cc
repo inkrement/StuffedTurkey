@@ -26,24 +26,63 @@ inline bool ends_with(const std::string& value, const std::string& ending) {
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::unique_ptr<Embedding> loadEmbedding(const std::string& filename){
+std::unique_ptr<Embedding> loadEmbedding(const std::string& filename,
+ const std::string type = "auto", std::string fvocab_file = ""){
     std::unique_ptr<Embedding> e(new Embedding());
 
-    if (ends_with(filename, ".vec")){
-        std::cout << "read vec-model" << std::endl;
-        e->loadvec(filename);
-    } else if (ends_with(filename, ".bin")) {
-        std::cout << "read binary-model" << std::endl;
-        e->loadbin(filename);
+    if (type == "auto"){
+        if (ends_with(filename, ".vec")){
+            std::cout << "read vec-model" << std::endl;
+            e->loadVec(filename);
+        } else {
+            throw std::runtime_error("not able to autodetect format. please set it manually");
+        }
+    } else if (type == "fasttext") {
+        e->loadFasttext(filename);
+    } else if (type == "word2vec") {
+        e->loadWord2Vec(filename);
+    } else if (type == "vec") {
+        e->loadVec(filename);
     } else {
-        throw std::runtime_error("unknown format");
+        throw std::runtime_error("unknown file_format:" + type);
+    }
+
+    if (fvocab_file != "") {
+        //try to add count data from vocab file
+
+        std::ifstream ifs(fvocab_file);
+
+        if (!ifs.is_open()) {
+            throw std::invalid_argument(fvocab_file + " cannot be opened for loading!");
+        }
+        
+        std::string line;
+
+        while (std::getline(ifs, line)){
+
+            // parse line
+            int last_pos = line.find_last_of(' ');
+            if (last_pos != std::string::npos){
+                std::string key = line.substr(0, last_pos);
+                int count_val = std::stoi(line.substr(last_pos + 1, std::string::npos));
+
+                if (e->contains(key)){
+                    e->updateCount(key, count_val);
+                }
+            }
+        }
+
+        ifs.close();
     }
 
     return e;
 }
 
-void aggEmbedding(std::string in_file, std::string out_file, const std::string map_file, AggregationMode agg_mode) {
-    auto emb = loadEmbedding(in_file);
+void aggEmbedding(std::string in_file, std::string out_file, 
+    const std::string map_file, AggregationMode agg_mode, 
+    std::string in_format, std::string fvocab) {
+
+    auto emb = loadEmbedding(in_file, in_format, fvocab);
     Embedding out_emb = Embedding(emb->dim());
 
     std::ifstream map_stream(map_file);
@@ -89,9 +128,10 @@ void aggEmbedding(std::string in_file, std::string out_file, const std::string m
     out_emb.dump(ofs);
 }
 
-void printInfo(std::string filename){
-    auto emb = loadEmbedding(filename); 
+void printInfo(std::string filename, std::string in_format){
+    auto emb = loadEmbedding(filename, in_format); 
 
+    std::cout << "Format: " << in_format << std::endl;
     std::cout << "Dimensions: " << emb->dim() << std::endl;
     std::cout << "Vocab size: " << emb->len() << std::endl;
     std::cout << "normalized: " << (emb->is_unit() ? "true" : "false") << std::endl;
@@ -108,8 +148,8 @@ void printInfo(std::string filename){
     std::cout << std::endl;
 }
 
-void unitEmbedding(std::string in_file, std::string out_file){
-    auto emb = loadEmbedding(in_file);
+void unitEmbedding(std::string in_file, std::string out_file, std::string in_format){
+    auto emb = loadEmbedding(in_file, in_format);
 
     emb->unit();
 
@@ -118,7 +158,7 @@ void unitEmbedding(std::string in_file, std::string out_file){
 }
 
 int main(int argc, char * argv[]){
-    std::string infile, outfile, cnt_file, mapping_file = "";
+    std::string infile, outfile, cnt_file, mapping_file = "", fvocab_file = "";
     std::string agg_mode = "log_weighted";
     std::string in_format = "auto";
     std::string out_format = "vec";
@@ -139,12 +179,12 @@ int main(int argc, char * argv[]){
                     value("input file", infile), 
                     value("output file", outfile),
                     value("mapping", mapping_file) % "json file which sates which items belong together",
-                    option("--item_counts") & value("count_file", cnt_file) % "item counts to calculate frequencies",
                     option("--mode", "-m") & value("agg_mode", agg_mode) % 
                         "aggregation mode (uniform, weighted or log_weighted). Defaults to log_weigted mean"
                 )
             ),
-            option("--in_format") & value("in_format", in_format) % "input format: bin, vec or auto (default)",
+            option("--fvocab") & value("fvocab", fvocab_file) % "item counts to calculate frequencies",
+            option("--in_format") & value("in_format", in_format) % "input format: fasttext, word2vec, vec or auto (default)",
             option("--out_format") & value("out_format", out_format) % "output format bin or vec (default)"
         ) | (command("help").set(selected, cmd::help))
     );
@@ -156,13 +196,12 @@ int main(int argc, char * argv[]){
 
     switch(selected) {
         case cmd::info: 
-            printInfo(infile);
+            printInfo(infile, in_format);
             break;
         case cmd::unit:
-            unitEmbedding(infile, outfile);
+            unitEmbedding(infile, outfile, in_format);
             break;
         case cmd::agg:
-            
             if(agg_mode == "uniform"){
                 amode = AggregationMode::uniform;
             } else if (agg_mode == "weighted") {
@@ -170,7 +209,7 @@ int main(int argc, char * argv[]){
             }
 
             //Embedding
-            aggEmbedding(infile, outfile, mapping_file, amode);
+            aggEmbedding(infile, outfile, mapping_file, amode, in_format, fvocab_file);
             break;
         case cmd::help:
             std::cout << make_man_page(cli, "stuffedturkey");

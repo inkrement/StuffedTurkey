@@ -77,6 +77,10 @@ namespace StuffedTurkey {
       return (data_.find(idx) != data_.end());
     }
 
+    inline void updateCount(std::string idx, int count_val){
+      data_[idx].c = count_val;
+    }
+
     inline void add(std::string key, Item val){
       data_.insert(std::make_pair(key, val));
     }
@@ -87,10 +91,12 @@ namespace StuffedTurkey {
 
     void dump(std::ostream&) const;
     
-    void loadbin(const std::string&);
-    void loadvec(const std::string&);
-    void loadbin(std::istream&);
-    void loadvec(std::istream&);
+    void loadWord2Vec(const std::string&);
+    void loadFasttext(const std::string&);
+    void loadVec(const std::string&);
+    void loadWord2Vec(std::istream&);
+    void loadFasttext(std::istream&);
+    void loadVec(std::istream&);
 
     class EncounteredNaNError : public std::runtime_error {
       public:
