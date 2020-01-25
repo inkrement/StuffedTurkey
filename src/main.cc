@@ -61,7 +61,7 @@ std::unique_ptr<Embedding> loadEmbedding(const std::string& filename,
         while (std::getline(ifs, line)){
 
             // parse line
-            int last_pos = line.find_last_of(' ');
+            size_t last_pos = line.find_last_of(' ');
             if (last_pos != std::string::npos){
                 std::string key = line.substr(0, last_pos);
                 int count_val = std::stoi(line.substr(last_pos + 1, std::string::npos));

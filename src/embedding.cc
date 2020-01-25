@@ -133,7 +133,7 @@ namespace StuffedTurkey {
     }
 
     void Embedding::loadVec(std::istream& in){
-        int num;
+        uint32_t num;
         std::string line;
 
         std::getline(in, line);
