@@ -14,7 +14,7 @@ sudo make install
 stuffedturkey --help 
 ```
 
-Altough, there is no Python package yet, it can be quite easily used in `jupyter(lab|hub)?` using the bash-syntax. Here is a minimalistic example how it could be used in combination with gensim:
+Although, there is no Python package yet, it can be quite easily used in `jupyter(lab|hub)?` using the bash-syntax. Here is a minimalistic example how it could be used in combination with gensim:
 
 ```py
 # TODO: insert paths
